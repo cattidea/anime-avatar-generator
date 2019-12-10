@@ -1,12 +1,12 @@
 {
-  "name": "avatar-generater",
+  "name": "avatar-generator",
   "version": "0.0.1",
   "description": "GAN 头像生成器",
-  "website": "https://zsync.github.io/avatar-generater/",
+  "website": "https://zsync.github.io/avatar-generator/",
   "author": "SigureMo",
   "license": "MIT",
   "docs": {
     "port": 8080,
-    "base": "/avatar-generater/"
+    "base": "/avatar-generator/"
   }
 }

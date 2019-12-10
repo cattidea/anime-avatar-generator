@@ -41,10 +41,12 @@ class Config(dict):
 def config_to_linear(config, linear_config={}, prefix=[]):
     for key in config:
         if isinstance(config[key], dict):
-            config_to_linear(config[key], linear_config=linear_config, prefix=prefix+[key])
+            config_to_linear(
+                config[key], linear_config=linear_config, prefix=prefix+[key])
         else:
             linear_config['-'.join(prefix+[key])] = config[key]
     return linear_config
+
 
 def config_to_tree(linear_config):
     config = {}
@@ -58,6 +60,7 @@ def config_to_tree(linear_config):
         cur[areas[-1]] = linear_config[key]
         cur = config
     return config
+
 
 def new_config(path):
     with open(path, 'r', encoding="utf8") as f:
