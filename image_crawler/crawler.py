@@ -75,7 +75,7 @@ async def get_one_page(page, **context):
             with Critical(context['vars'], context['lock']) as vars:
                 num = vars['id']
                 vars['id'] += 1
-            file_path = f'{img_dir}{num: 06d}.{ext}'
+            file_path = f'{img_dir}{num:06d}.{ext}'
             print(f'{file_path} << {img_url}')
             await download(session, img_url, file_path)
 

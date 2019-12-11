@@ -1,6 +1,6 @@
 {
   "name": "avatar-generator",
-  "version": "0.0.1",
+  "version": "0.0.1-alpha.3",
   "description": "GAN 头像生成器",
   "website": "https://zsync.github.io/avatar-generator/",
   "author": "SigureMo",
@@ -8,5 +8,9 @@
   "docs": {
     "port": 8080,
     "base": "/avatar-generator/"
+  },
+  "cache": {
+    "root": "data/cache/",
+    "enable": true
   }
 }
