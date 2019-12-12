@@ -3,11 +3,13 @@ import json
 import h5py
 import pickle
 import hashlib
+import copy
 
 from config_parser.config import CONFIG
 
 key_maps = {
-    'general': lambda *args, **kwargs: __general_key_map(*args, **kwargs)
+    'general': lambda *args, **kwargs: __general_key_map(*args, **kwargs),
+    'unique': lambda *args, **kwargs: None,
 }
 
 
@@ -26,9 +28,9 @@ class Cacher():
         self.name = name
 
     def read(self):
-        if os.path.exists(self.path):
+        if self.exists():
             data = self._load()
-            if self.name:
+            if self.name is not None:
                 print("Cache >> {}".format(self.name))
         else:
             raise CacheNotFoundError(self.path)
@@ -36,7 +38,7 @@ class Cacher():
 
     def save(self, data):
         self._dump(data)
-        if self.name:
+        if self.name is not None:
             print("Cache << {}".format(self.name))
 
     def _load(self):
@@ -48,12 +50,15 @@ class Cacher():
         with open(self.path, 'wb') as f:
             pickle.dump(data, f)
 
+    def exists(self):
+        return os.path.exists(self.path)
+
 
 class H5Cacher(Cacher):
     """ H5 数据缓存器 """
 
-    def __init__(self, path, name=None):
-        super().__init__(self, path, ".h5", name)
+    def __init__(self, path, ext='.h5', name=None):
+        super().__init__(path, ext, name)
 
     def _load(self):
         data = {}
@@ -77,8 +82,8 @@ class H5Cacher(Cacher):
 class JSONCacher(Cacher):
     """ JSON 数据缓存器 """
 
-    def __init__(self, path, name=None):
-        super().__init__(self, path, ".json", name)
+    def __init__(self, path, ext='.json', name=None):
+        super().__init__(path, ext, name)
 
     def _load(self):
         with open(self.path, 'r', encoding="utf8") as f:
@@ -88,6 +93,24 @@ class JSONCacher(Cacher):
     def _dump(self, data):
         with open(self.path, 'w', encoding="utf8") as f:
             json.dump(data, f, indent=2)
+
+
+class MemoryCacher(Cacher):
+    """ 内存数据缓存器 """
+
+    CACHE = dict()
+
+    def __init__(self, path, ext='', name=None):
+        super().__init__(path, ext, name)
+
+    def _load(self):
+        return copy.deepcopy(MemoryCacher.CACHE[self.path])
+
+    def _dump(self, data):
+        MemoryCacher.CACHE[self.path] = copy.deepcopy(data)
+
+    def exists(self):
+        return MemoryCacher.CACHE.get(self.path) is not None
 
 
 class CacheLoader():
@@ -102,18 +125,22 @@ class CacheLoader():
     - [ ] 控制 Cache 上限大小
     """
 
-    def __init__(self, key_map='general', enable=CONFIG.cache.enable, ext=".pkl"):
+    def __init__(self, key_map='general', enable=CONFIG.cache.enable, ext=".pkl", type=Cacher, log=CONFIG.cache.log):
         self.key_map = key_maps.get(key_map, key_map)
         self.enable = enable
         self.ext = ext
+        self.cache_type = type
+        self.log = log
         self.name = None
 
-    def get_file_path(self, *args, **kw):
+    def get_path(self, hash):
 
         file_name = self.name
-        hash = self.key_map(*args, **kw)
         file_path = os.path.join(CONFIG.cache.root, file_name)
-        file_path += f'-{hash}{self.ext}'
+        if hash is not None:
+            file_path += f'-{hash}{self.ext}'
+        else:
+            file_path += f'{self.ext}'
         return file_path
 
     def __call__(self, func):
@@ -123,11 +150,16 @@ class CacheLoader():
         else:
             print('[warn] function {func_name} is not start with "get"')
             self.name = func_name
-        def load_data(*args, **kw):
-            file_path = self.get_file_path(*args, **kw)
-            cacher = Cacher(file_path, ext=self.ext, name=self.name)
 
-            if self.enable and os.path.exists(file_path):
+        def load_data(*args, **kw):
+            hash = self.key_map(*args, **kw)
+            if self.cache_type == MemoryCacher:
+                file_path = hash
+            else:
+                file_path = self.get_path(hash)
+            cacher = self.cache_type(file_path, ext=self.ext, name=self.name if self.log else None)
+
+            if self.enable and cacher.exists():
                 data = cacher.read()
             else:
                 data = func(*args, **kw)
@@ -147,12 +179,12 @@ class Md5():
     def result(self):
         return self.__core.hexdigest()
 
-    def update_file(self, path, chunk_size = 8192):
+    def update_file(self, path, chunk_size=8192):
         """ 添加文件 """
         with open(path, 'rb') as f:
             while True:
                 b = f.read(chunk_size)
-                if not b :
+                if not b:
                     break
                 self.update(b)
 

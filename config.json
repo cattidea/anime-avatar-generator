@@ -11,6 +11,7 @@
   },
   "cache": {
     "root": "data/cache/",
-    "enable": true
+    "enable": true,
+    "log": true
   }
 }
