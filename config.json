@@ -7,7 +7,7 @@
   "license": "MIT",
   "docs": {
     "port": 8080,
-    "base": "/avatar-generator/"
+    "docs_dir": "docs/"
   },
   "cache": {
     "root": "data/cache/",

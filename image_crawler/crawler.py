@@ -41,8 +41,8 @@ async def fetch(session, url):
     try:
         async with session.get(url) as response:
             return await response.text()
-    except (aiohttp.client_exceptions.ClientOSError, aiohttp.client_exceptions.ServerDisconnectedError):
-        pass
+    except Exception as e:
+        print("[ERROR] {}".format(e.message))
 
 
 async def download(session, url, file_path):
@@ -52,8 +52,8 @@ async def download(session, url, file_path):
             content = await response.read()
             async with aiofiles.open(file_path, 'wb') as f:
                 await f.write(content)
-    except (aiohttp.client_exceptions.ClientOSError, aiohttp.client_exceptions.ServerDisconnectedError):
-        pass
+    except Exception as e:
+        print("[ERROR] {}".format(e))
 
 
 async def get_one_page(page, **context):
@@ -123,7 +123,7 @@ if __name__ == '__main__':
     for i in range(10000):
         pages.put(i)
 
-    for i in range(3):
+    for i in range(5):
         p = Process(target=process_task, kwargs=context)
         p.start()
         processes.append(p)

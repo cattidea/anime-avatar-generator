@@ -4,9 +4,9 @@ from config_parser.parser import config_to_tree
 
 class ArgumentParser(object):
 
-    def __init__(self, name):
+    def __init__(self, name, actions):
         self.core = argparse.ArgumentParser(description=name)
-        self.core.add_argument('action', choices=['train', 'test'], help='test or train')
+        self.core.add_argument('action', choices=actions, help='Your action')
 
     def bind(self, config):
         linear_config = config.linear()
@@ -16,8 +16,10 @@ class ArgumentParser(object):
                 kwargs['action'] = 'store_' + str(value).lower()
             else:
                 kwargs['default'] = value
+                kwargs['type'] = type(value)
             self.core.add_argument('--'+key, **kwargs)
         args = self.core.parse_args()
         for key in linear_config:
             linear_config[key] = args.__dict__[key.replace('-', '_')]
         config.update(config_to_tree(linear_config))
+        config['action'] = args.action

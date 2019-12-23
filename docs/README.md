@@ -28,7 +28,7 @@ GAN 头像生成器
 使用 `Docsify` 方便快捷地生成文档站点，只需要使用以下命令即可实时预览内容（改动后需刷新），无需安装任何依赖
 
 ``` bash
-python docs
+python main.py docs
 ```
 
 ## 通用缓存
