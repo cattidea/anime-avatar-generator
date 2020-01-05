@@ -1,10 +1,9 @@
 # import requests
 import asyncio
+from multiprocessing import Manager, Process, Queue
+
 import aiofiles
 import aiohttp
-# import queue
-from multiprocessing import Process, Queue, Manager
-
 from bs4 import BeautifulSoup
 
 try:

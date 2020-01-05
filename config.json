@@ -9,6 +9,11 @@
     "port": 8080,
     "docs_dir": "docs/"
   },
+  "data": {
+    "cascade_file": "data/lbpcascade_animeface.xml",
+    "faces_dir": "data/faces/",
+    "origin_images_dir": "data/origin_imgs/"
+  },
   "cache": {
     "root": "data/cache/",
     "enable": true,
