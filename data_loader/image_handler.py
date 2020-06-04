@@ -3,8 +3,7 @@ from cv2 import cv2
 from config_parser.config import CONFIG
 
 ANGLES = [
-    -90, -75, -60, -45, -30, -20, -15, -10, -5, -3, -2, -1,
-    0, 1, 2, 3, 5, 10, 15, 20, 30, 45, 60, 75, 90
+    0, -45, 45, -90, 90
 ]
 
 def detect(filename, out_dir=CONFIG.data.faces_dir, cascade_file=CONFIG.data.cascade_file):
@@ -17,8 +16,7 @@ def detect(filename, out_dir=CONFIG.data.faces_dir, cascade_file=CONFIG.data.cas
         print(f'[ERROR] Can not read image {filename}')
         return
     cnt = 0
-    # for angle in ANGLES:
-    for angle in [0]:
+    for angle in ANGLES:
         print(f'Detecting {filename} angle: {angle}...', end='\r')
         rotated_image = rotate(image, angle)
         gray = cv2.cvtColor(rotated_image, cv2.COLOR_BGR2GRAY)
@@ -36,7 +34,9 @@ def detect(filename, out_dir=CONFIG.data.faces_dir, cascade_file=CONFIG.data.cas
             save_filename = '{}-{:02d}.jpg'.format(os.path.splitext(filename)[0], cnt)
             # cv2.imshow("AnimeFaceDetect", face)
             # cv2.waitKey(0)
-            cv2.imwrite(os.path.join(out_dir, os.path.split(save_filename)[-1]), face)#写入文件
+            cv2.imwrite(os.path.join(out_dir, os.path.split(save_filename)[-1]), face)
+        if faces != ():
+            break
 
     # cv2.imshow("AnimeFaceDetect", image)
     # cv2.waitKey(0)
@@ -52,3 +52,9 @@ def rotate(img_arr, angle):
 for file_name in os.listdir(CONFIG.data.origin_images_dir):
     file_path = os.path.join(CONFIG.data.origin_images_dir, file_name)
     detect(file_path)
+    file_path_used = os.path.join(CONFIG.data.origin_images_used_dir, file_name)
+    # os.rename(file_path, file_path_used)
+    with open(file_path, 'rb') as fr:
+        with open(file_path_used, 'wb') as fw:
+            fw.write(fr.read())
+    os.remove(file_path)

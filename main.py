@@ -25,4 +25,4 @@ if __name__ == '__main__':
         docs_dev()
     elif CONFIG.action == 'crawl':
         from utils.process import new_process
-        new_process(["python3", "image_crawler/crawler.py"])
+        new_process(["python", "image_crawler/crawler.py"])

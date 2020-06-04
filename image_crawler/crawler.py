@@ -41,7 +41,8 @@ async def fetch(session, url):
         async with session.get(url) as response:
             return await response.text()
     except Exception as e:
-        print("[ERROR] {}".format(e.message))
+        message = e.message if hasattr(e, 'message') else type(e)
+        print("[ERROR] {}".format(message))
 
 
 async def download(session, url, file_path):
@@ -52,7 +53,9 @@ async def download(session, url, file_path):
             async with aiofiles.open(file_path, 'wb') as f:
                 await f.write(content)
     except Exception as e:
-        print("[ERROR] {}".format(e))
+        message = e.message if hasattr(e, 'message') else type(e)
+        print("[ERROR] {}".format(message))
+        return None
 
 
 async def get_one_page(page, **context):
@@ -60,12 +63,16 @@ async def get_one_page(page, **context):
     url = home_url.format(root=root_url, page=page)
     async with aiohttp.ClientSession() as session:
         html = await fetch(session, url)
-        soup = BeautifulSoup(html, 'html.parser')
+        if html is None:
+            return
+        soup = BeautifulSoup(html, 'lxml')
         links = soup.find_all('a', class_='thumb')
         for link in links:
             url = root_url + link['href']
             html = await fetch(session, url)
-            soup = BeautifulSoup(html, 'html.parser')
+            if html is None:
+                continue
+            soup = BeautifulSoup(html, 'lxml')
             if download_origin_img:
                 img_url = soup.find('a', class_='highres-show')['href']
             else:
@@ -75,7 +82,7 @@ async def get_one_page(page, **context):
                 num = vars['id']
                 vars['id'] += 1
             file_path = f'{img_dir}{num:06d}.{ext}'
-            print(f'{file_path} << {img_url}')
+            print(f'{page} {file_path}', end='\r')
             await download(session, img_url, file_path)
 
 
