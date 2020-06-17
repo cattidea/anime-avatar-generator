@@ -3,10 +3,8 @@ import subprocess
 import time
 import webbrowser
 
-from config_parser.config import CONFIG
-
-docs_dir = CONFIG.docs.docs_dir
-port = CONFIG.docs.port
+docs_dir = 'docs/'
+port = 2333
 host = 'localhost'
 
 
