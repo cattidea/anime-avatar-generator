@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "anime_avatar_generator"
+version = "0.1.0"
+description = ""
+authors = ["Nyakku Shigure <sigure.qaq@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+tensorflow = "^2.5.0"
+matplotlib = "^3.3.4"
+opencv-python = "^4.5.3.56"
+imgaug = "^0.4.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+train = "anime_avatar_generator.train:run"
